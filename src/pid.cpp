@@ -12,11 +12,11 @@ double PID::calculate(double new_error) {
     
     last_iterm += I*0.5*(new_error + last_error)*DT*1e-3;     // trapezoidal integration
     last_error = new_error;
-    if (last_iterm > 0.08){
-        last_iterm = 0.08;                                // Anti integrator windup. cap i_term at 20% throttle adjustment
+    if (last_iterm > 0.1){
+        last_iterm = 0.1;                                // Anti integrator windup. cap i_term at 20% throttle adjustment
     }
-    else if (last_iterm < -0.08){
-        last_iterm = -0.08;
+    else if (last_iterm < -0.1){
+        last_iterm = -0.1;
     }
     double dterm = D*(new_error - last_error)/(DT*1e-3);
     if (dterm > 0.12) {dterm = 0.12;}

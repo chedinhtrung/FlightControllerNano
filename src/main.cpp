@@ -29,8 +29,8 @@ Imu imu = Imu();
 Dps310Altimeter alt = Dps310Altimeter();
 TinyGPSPlus gps;
 
-PID pitchratepid = PID(0.00038, 0.00017, 0.0023*1e-3); 
-PID rollratepid = PID(0.00038, 0.00017, 0.0023*1e-3); 
+PID pitchratepid = PID(0.00042, 0.00014, 0.0025*1e-3); 
+PID rollratepid = PID(0.00042, 0.00014, 0.0025*1e-3); 
 PID yawratepid = PID(0.0044, 0.00017, 0);
 //PID anglepid = PID();
 /*
@@ -163,15 +163,15 @@ void loop() {
 
   // use square root curve to calculate desired rates
   if (pitch_error >= 0){
-    pitchrate_target = pitch_error/(0.034*sqrt(pitch_error) + 0.37);
+    pitchrate_target = pitch_error/(0.05*sqrt(pitch_error) + 0.37);
   } else {
-    pitchrate_target = pitch_error/(0.034*sqrt(-pitch_error) + 0.37);
+    pitchrate_target = pitch_error/(0.05*sqrt(-pitch_error) + 0.37);
   }
 
   if (roll_error >= 0){
-    rollrate_target = roll_error/(0.034*sqrt(roll_error) + 0.37);;
+    rollrate_target = roll_error/(0.05*sqrt(roll_error) + 0.37);;
   } else {
-    rollrate_target = roll_error/(0.034*sqrt(-roll_error) + 0.37);
+    rollrate_target = roll_error/(0.05*sqrt(-roll_error) + 0.37);
   }
   
 
@@ -231,7 +231,7 @@ void loop() {
     
     vert_speed = vert_speed * 0.992 + 0.008 * (h - past_h)/0.04;
     */
-    h = alt.read();
+    //h = alt.read();
     last_altupdate = micros();
   }
 
@@ -276,29 +276,17 @@ void loop() {
                         22B * 8/4ms << 115200 baud/s     
   */
   
+  /*
   if (rd.AuxChannel5In > 1700) {
-    Serial1.write(STARTBYTE);
-
-    /*
-    Serial1.write(motor.motor_report.fl);
-    Serial1.write(motor.motor_report.fr);
-    Serial1.write(motor.motor_report.bl);
-    Serial1.write(motor.motor_report.br);
-
-    Serial1.write(imu.raw_gyros.x);
-    Serial1.write(imu.raw_gyros.y);
-    Serial1.write(imu.raw_gyros.z);
-
-    Serial1.write(imu.raw_accels.x);
-    Serial1.write(imu.raw_accels.y);
-    Serial1.write(imu.raw_accels.z);
-    */
+    Serial2.write(STARTBYTE);
+    
     Serial2.write((uint8_t*)&motor.motor_report, sizeof(RawMotor));
     Serial2.write((uint8_t*)&imu.raw_gyros, sizeof(RawImuData));
     Serial2.write((uint8_t*)&imu.raw_accels, sizeof(RawImuData));
     Serial2.write((uint8_t*)&alt.raw_alt, sizeof(uint16_t));
 
   }
+  */
 
   //FLight display report
 
@@ -312,10 +300,10 @@ void loop() {
     report.lon = 0.0;
     report.lat = 0.0;
 
-    //Serial1.write(STARTBYTE);
+    Serial2.write(STARTBYTE);
     //float checksum = report.roll + report.pitch + report.yaw + report.h;
-    //Serial1.write((uint8_t*)&report, sizeof(report)); 
-    //Serial1.write(checksum);  
+    Serial2.write((uint8_t*)&report, sizeof(report)); 
+    //Serial2.write(checksum);  
     
     /*
     Serial.print("T: ");
