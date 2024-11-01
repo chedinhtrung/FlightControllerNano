@@ -1,7 +1,7 @@
 #include "receiver.h"
 
 Receiver::Receiver(){
-    in.begin(9);            // Use pin 6 for PPM Input
+    in.begin(6);            // Use pin 6 for PPM Input
 }
 
 ReceiverData Receiver::recv(){

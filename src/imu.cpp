@@ -13,15 +13,18 @@ void Imu::setup(){
     // Configure Gyroscope
     Wire.beginTransmission(IMUADDR);         // Start communication with MPU6050 // MPU=0x68
     Wire.write(0x1A);                        // Register 1A for Low Pass Filter (both gyro and accelerometer)
-    Wire.write(0x03);                        // Set to 20Hz bandwidth
+    Wire.write(0x01);                        // Set to 20Hz bandwidth
     Wire.endTransmission();
     delay(100);
  
     Wire.beginTransmission(IMUADDR);       
     Wire.write(0x1B);                       // Set sensitivity at Register 0x1B
-    Wire.write(0x8);                        // Sensitivity at +- 500 degrees/s. 
+    Wire.write(0x08);                        // Sensitivity at +- 500 degrees/s. 
     Wire.endTransmission();                 // IMPORTANT: This sets 65.5 bits/degree/s. Divide read value by 65.5!
     delay(100);
+
+    //load factory offset values
+    //TODO
 
     // Configure Accelerometer
     Wire.beginTransmission(IMUADDR); 
@@ -29,6 +32,7 @@ void Imu::setup(){
     Wire.write(0x08);                        // Set sensitivity at +-4g (non aggressive flying)
     Wire.endTransmission();
     calibrate();
+
 }
 
 ImuData Imu::read(){
@@ -56,8 +60,8 @@ ImuData Imu::read(){
 
     // Calculate angular velocities  IMPORTANT: Roll and Pitch are assigned to Y and X respectively,
     // Because of how I mount my gyro 
-    data.angle_rate.roll = (double)gyroY/65.5 - angle_rate_offset.roll;             // convention: right roll = positive
-    data.angle_rate.pitch = -(double)gyroX/65.5 - angle_rate_offset.pitch;         // convention: up pitch = positive
+    data.angle_rate.roll = -(double)gyroY/65.5 - angle_rate_offset.roll;             // convention: right roll = positive
+    data.angle_rate.pitch = (double)gyroX/65.5 - angle_rate_offset.pitch;         // convention: up pitch = positive
     data.angle_rate.yaw = (double)gyroZ/65.5 - angle_rate_offset.yaw;      // convention: right yaw = positive
 
     // put data to raw report
@@ -72,18 +76,28 @@ ImuData Imu::read(){
     raw_gyros.z = gyroZ;
 
     // Calculate accelerometer data
-    double AccX = -((double)accelY/8192.0 + 0.015);
-    double AccY = (double)accelX/8192.0 - 0.058;
-    double AccZ = (-(double)accelZ/8192.0 - 0.14);
+    double AccX = ((double)accelY/8192.0) - 0.09;
+    double AccY = -((double)accelX/8192.0) + 0.13;
+    double AccZ = -(double)accelZ/8192.0 - 0.03;
 
     data.accel.x = AccX;
     data.accel.y = AccY;
-    data.accel.z = AccZ;        
+    data.accel.z = AccZ;  
+
+    /*
+    Serial.print("x: ");
+    Serial.print(AccX);
+    Serial.print(" y: ");
+    Serial.print(AccY);
+    Serial.print(" z: ");
+    Serial.println(AccZ);
+    */
+
 
     // Convert to angles
 
-    data.angle.roll = atan(AccY/AccZ)/PI*180 + 0.9;                                // Convention: right roll = positive
-    data.angle.pitch = atan(-AccX/(sqrt(AccY*AccY + AccZ*AccZ)))/PI*180 - 3.7;       // Convention:  down = positive (mpu says up is positive!)
+    data.angle.roll = atan(AccY/AccZ)/PI*180 + 8.2;                                // Convention: right roll = positive
+    data.angle.pitch = atan(-AccX/(sqrt(AccY*AccY + AccZ*AccZ)))/PI*180 + 6;       // Convention:  down = positive (mpu says up is positive!)
     
     
     return data;

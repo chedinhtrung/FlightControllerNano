@@ -20,8 +20,8 @@ Servo gimbal;
 static Model model;
 static Report report;
 
-Kalman rollkalmanfilter = Kalman(3, 3, 4.5);
-Kalman pitchkalmanfilter = Kalman(3, 3, 4.5);
+Kalman rollkalmanfilter = Kalman(6, 3, 6);
+Kalman pitchkalmanfilter = Kalman(6, 3, 6);
 
 PulsePositionInput control_in(RISING);
 Receiver receiver = Receiver();
@@ -29,8 +29,8 @@ Imu imu = Imu();
 Dps310Altimeter alt = Dps310Altimeter();
 TinyGPSPlus gps;
 
-PID pitchratepid = PID(0.00042, 0.00014, 0.0025*1e-3); 
-PID rollratepid = PID(0.00042, 0.00014, 0.0025*1e-3); 
+PID pitchratepid = PID(0.00066, 0.0002, 0.0025*1e-3); 
+PID rollratepid = PID(0.0006, 0.0002, 0.0025*1e-3); 
 PID yawratepid = PID(0.0044, 0.00017, 0);
 //PID anglepid = PID();
 /*
@@ -163,15 +163,15 @@ void loop() {
 
   // use square root curve to calculate desired rates
   if (pitch_error >= 0){
-    pitchrate_target = pitch_error/(0.05*sqrt(pitch_error) + 0.37);
+    pitchrate_target = pitch_error/(0.025*sqrt(pitch_error) + 0.45);
   } else {
-    pitchrate_target = pitch_error/(0.05*sqrt(-pitch_error) + 0.37);
+    pitchrate_target = pitch_error/(0.025*sqrt(-pitch_error) + 0.45);
   }
 
   if (roll_error >= 0){
-    rollrate_target = roll_error/(0.05*sqrt(roll_error) + 0.37);;
+    rollrate_target = roll_error/(0.018*sqrt(roll_error) + 0.45);;
   } else {
-    rollrate_target = roll_error/(0.05*sqrt(-roll_error) + 0.37);
+    rollrate_target = roll_error/(0.018*sqrt(-roll_error) + 0.45);
   }
   
 
@@ -306,11 +306,14 @@ void loop() {
     //Serial2.write(checksum);  
     
     /*
-    Serial.print("T: ");
-    Serial.print(micros()-last_active);
-    Serial.print(" H: ");
-    Serial.println(h); 
+    Serial.print("r: ");
+    Serial.print(report.roll);
+    Serial.print("p: ");
+    Serial.print(report.pitch);
+    Serial.print("y: ");
+    Serial.println(report.yaw);
     */
+    
     
     
   }

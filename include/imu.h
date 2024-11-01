@@ -29,6 +29,7 @@ class Imu {
         ImuData read();
         void calibrate();
         Angle angle_rate_offset;
+        Angle factory_angle_rate_offset;
         ImuData read_compensated(double roll, double pitch);
 };
 

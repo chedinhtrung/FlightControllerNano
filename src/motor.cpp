@@ -22,7 +22,7 @@ void Motor::set_motor(float fl, float fr, float bl, float br){
         100% ---> 4095 ---> 2000ms
     */
 
-    fr += 0.009;  // Motor trimming 
+    //fr += 0.019;  // Motor trimming 
 
     if (fr > 1){fr = 0.01;}
     else if (fr < 0){fr = 0;}
