@@ -1,38 +1,53 @@
 #include "imu.h"
 #include "Wire.h"
 #include <Arduino.h>
+#include "debugger.h"
 
 void Imu::setup(){
+    // Manual accel ffset values
+    offset.accel.z = -0.07;
+    offset.accel.y = 0.02;
+    offset.accel.x = -0.015;
     // Wake up imu
     Wire.beginTransmission(IMUADDR);
     Wire.write(0x6B); 
     Wire.write(0x03);                   // Set PLL clock to use Z Axis Gyro as reference. also resets imu
     Wire.endTransmission();
-    delay(100);
+    delay(50);
 
     // Configure Gyroscope
-    Wire.beginTransmission(IMUADDR);         // Start communication with MPU6050 // MPU=0x68
+    Wire.beginTransmission(IMUADDR);         
     Wire.write(0x1A);                        // Register 1A for Low Pass Filter (both gyro and accelerometer)
     Wire.write(0x01);                        // Set to 20Hz bandwidth
     Wire.endTransmission();
-    delay(100);
+    delay(50);
  
     Wire.beginTransmission(IMUADDR);       
     Wire.write(0x1B);                       // Set sensitivity at Register 0x1B
     Wire.write(0x08);                        // Sensitivity at +- 500 degrees/s. 
     Wire.endTransmission();                 // IMPORTANT: This sets 65.5 bits/degree/s. Divide read value by 65.5!
-    delay(100);
-
-    //load factory offset values
-    //TODO
+    delay(50);
 
     // Configure Accelerometer
     Wire.beginTransmission(IMUADDR); 
     Wire.write(0x1C);                       // Set sensitivity at Register 0x1C
-    Wire.write(0x08);                        // Set sensitivity at +-4g (non aggressive flying)
+    Wire.write(0x08);                       // Set sensitivity at +-4g (non aggressive flying)
     Wire.endTransmission();
-    calibrate();
+    delay(50);
 
+    Wire.beginTransmission(IMUADDR);        // Set bypass to access magnetometer at 0x0C
+    Wire.write(0x37);
+    Wire.endTransmission();
+    Wire.requestFrom(IMUADDR, 1);
+    byte intpincfg = Wire.read();
+    intpincfg |= 0x02;
+    Wire.beginTransmission(IMUADDR);
+    Wire.write(0x37);
+    Wire.write(intpincfg);
+    Wire.endTransmission();
+    delay(50);
+
+    calibrate_gyro();
 }
 
 ImuData Imu::read(){
@@ -58,88 +73,38 @@ ImuData Imu::read(){
     int16_t gyroZ = Wire.read()<<8 | Wire.read();
     //Serial.println(micros() - start);
 
-    // Calculate angular velocities  IMPORTANT: Roll and Pitch are assigned to Y and X respectively,
-    // Because of how I mount my gyro 
-    data.angle_rate.roll = -(double)gyroY/65.5 - angle_rate_offset.roll;             // convention: right roll = positive
-    data.angle_rate.pitch = (double)gyroX/65.5 - angle_rate_offset.pitch;         // convention: up pitch = positive
-    data.angle_rate.yaw = (double)gyroZ/65.5 - angle_rate_offset.yaw;      // convention: right yaw = positive
-
-    // put data to raw report
-    
-
-    raw_accels.x = accelX;
-    raw_accels.y = accelY;
-    raw_accels.z = accelZ;
-
-    raw_gyros.x = gyroX;
-    raw_gyros.y = gyroY;
-    raw_gyros.z = gyroZ;
+    // Calculate angular velocities  
+    // NOTE: has to remap to actual x y z of drone due to imu mounting position!
+    data.gyro.x = -(float)gyroX/65.5 - offset.gyro.x;          
+    data.gyro.y = (float)gyroY/65.5 - offset.gyro.y;             
+    data.gyro.z = -(float)gyroZ/65.5 - offset.gyro.z;      
 
     // Calculate accelerometer data
-    double AccX = ((double)accelY/8192.0) - 0.09;
-    double AccY = -((double)accelX/8192.0) + 0.13;
-    double AccZ = -(double)accelZ/8192.0 - 0.03;
+    float AccX = -(float)accelX/8192.0 - offset.accel.x;
+    float AccY = ((float)accelY/8192.0) - offset.accel.y;
+    float AccZ = -(float)accelZ/8192.0 - offset.accel.z;
 
     data.accel.x = AccX;
     data.accel.y = AccY;
     data.accel.z = AccZ;  
-
-    /*
-    Serial.print("x: ");
-    Serial.print(AccX);
-    Serial.print(" y: ");
-    Serial.print(AccY);
-    Serial.print(" z: ");
-    Serial.println(AccZ);
-    */
-
-
-    // Convert to angles
-
-    data.angle.roll = atan(AccY/AccZ)/PI*180 + 8.2;                                // Convention: right roll = positive
-    data.angle.pitch = atan(-AccX/(sqrt(AccY*AccY + AccZ*AccZ)))/PI*180 + 6;       // Convention:  down = positive (mpu says up is positive!)
-    
     
     return data;
 }
 
-void Imu::calibrate(){
-    double RollRateOffset = 0;
-    double PitchRateOffset = 0;
-    double YawRateOffset = 0;
+void Imu::calibrate_gyro(){
+    float x_rot_rate_offset = 0.0;
+    float y_rot_rate_offset = 0.0;
+    float z_rot_rate_offset = 0.0;
 
-    /*
-    double RollOffset = 0;
-    double PitchOffset = 0;
-    double YawOffset = 0;
-    */
-    for (int i=0; i<2000; i++){
+    for (int i=0; i<3000; i++){
         ImuData data = read();
-        RollRateOffset += data.angle_rate.roll;
-        PitchRateOffset += data.angle_rate.pitch;
-        YawRateOffset += data.angle_rate.yaw;
+        x_rot_rate_offset += data.gyro.x;
+        y_rot_rate_offset += data.gyro.y;
+        z_rot_rate_offset += data.gyro.z;
         delay(1);
-        /*
-        RollOffset += data.MRoll;
-        PitchOffset += data.MPitch;
-        YawOffset += data.MYaw;
-        */
     }
 
-
-    angle_rate_offset.roll = RollRateOffset/2000;       // convention: right roll = positive
-    angle_rate_offset.pitch = PitchRateOffset/2000;    // convention: up pitch = positive
-    angle_rate_offset.yaw = YawRateOffset/2000;        // convention: right yaw = positive
-
-    /*
-    PitchOffset /= 10000;
-    RollOffset/=10000;
-    YawOffset /= 10000;
-    Serial.print("RollOffset: ");
-    Serial.print(RollOffset, 6);
-    Serial.print(" PitchOffset: ");
-    Serial.print(PitchOffset, 6);
-    Serial.print(" YawOffset: ");
-    Serial.print(YawOffset, 6);
-    */
+    offset.gyro.x = x_rot_rate_offset/3000.0;       // convention: right roll = positive
+    offset.gyro.y = y_rot_rate_offset/3000.0;    // convention: up pitch = positive
+    offset.gyro.z = z_rot_rate_offset/3000.0;        // convention: right yaw = positive
 }

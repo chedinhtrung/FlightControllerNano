@@ -5,13 +5,8 @@
 #include "datastructures.h"
 #include <Arduino.h>
 
-#define IMUADDR 0x68 // MPU6050 I2C address
-
-struct ImuData {
-    Angle angle;
-    Angle angle_rate;
-    Coords accel;
-};
+#define IMUADDR 0x68 // MPU6050/9250 I2C address
+#define MAGADDR 0x0C
 
 struct RawImuData {
     int16_t x = 0;
@@ -19,18 +14,24 @@ struct RawImuData {
     int16_t z = 0;
 };
 
+struct ConvertedImuData {
+    float x = 0;
+    float y = 0;
+    float z = 0;
+};
+
+struct ImuData {
+    ConvertedImuData accel;
+    ConvertedImuData gyro;
+    ConvertedImuData magneto;
+};
+
 class Imu {
-    public: 
-        // Raw values for data gathering
-        RawImuData raw_accels;   
-        RawImuData raw_gyros;
-        
+    public:  
+        ImuData offset; 
         void setup();
         ImuData read();
-        void calibrate();
-        Angle angle_rate_offset;
-        Angle factory_angle_rate_offset;
-        ImuData read_compensated(double roll, double pitch);
+        void calibrate_gyro();
 };
 
 #endif 

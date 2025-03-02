@@ -1,6 +1,5 @@
 #ifndef PIDCTL
 #define PIDCTL
-#include "lpf.h"
 
 class PID {
     public:

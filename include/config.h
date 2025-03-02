@@ -1,6 +1,6 @@
 #ifndef CONFIG 
 #define CONFIG
 
-#define DT 1  // delay time between refreshes
+#define DT 3  // delay time (millisecs) between updates
 
 #endif

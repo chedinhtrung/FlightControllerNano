@@ -1,7 +1,7 @@
 #ifndef DATASTRUCT
 #define DATASTRUCT
 
-struct Angle {
+struct EulerAngle {
     double yaw = 0.0;
     double pitch = 0.0;
     double roll = 0.0;
