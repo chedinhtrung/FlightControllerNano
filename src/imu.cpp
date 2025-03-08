@@ -77,9 +77,10 @@ ImuData Imu::read(){
     raw_gyros.z = gyroZ;
 
     // Calculate accelerometer data
-    double AccX = (-(double)accelX/8192.0) - 0.09;
-    double AccY = ((double)accelY/8192.0) + 0.13;
-    double AccZ = -(double)accelZ/8192.0 - 0.03;
+    
+    double AccX = (-(double)accelX/8192.0) + 0.07;
+    double AccY = ((double)accelY/8192.0) - 0.02;
+    double AccZ = -(double)accelZ/8192.0 + 0.015;
 
     data.accel.x = AccX;
     data.accel.y = AccY;
