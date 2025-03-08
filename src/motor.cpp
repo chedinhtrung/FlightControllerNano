@@ -2,10 +2,10 @@
 #include "Arduino.h"
 
 void Motor::set_motor_raw(int fl, int fr, int bl, int br) {
-    analogWrite(2, fl);
-    analogWrite(A8, fr);
-    analogWrite(5, bl);
-    analogWrite(11, br);
+    analogWrite(FL, fl);
+    analogWrite(FR, fr);
+    analogWrite(BL, bl);
+    analogWrite(BR, br);
 }
 
 void Motor::set_motor(float fl, float fr, float bl, float br){

@@ -2,6 +2,11 @@
 #define MOTOR
 #include <Arduino.h>
 
+#define FR 2
+#define FL A8
+#define BR 5
+#define BL 11
+
 struct RawMotor {
     uint16_t fl;
     uint16_t fr;
