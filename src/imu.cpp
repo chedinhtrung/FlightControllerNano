@@ -59,10 +59,11 @@ ImuData Imu::read(){
     //Serial.println(micros() - start);
 
     // Calculate angular velocities  IMPORTANT: Roll and Pitch are assigned to Y and X respectively,
-    // Because of how I mount my gyro 
-    data.angle_rate.roll = -(double)gyroY/65.5 - angle_rate_offset.roll;             // convention: right roll = positive
-    data.angle_rate.pitch = (double)gyroX/65.5 - angle_rate_offset.pitch;         // convention: up pitch = positive
-    data.angle_rate.yaw = (double)gyroZ/65.5 - angle_rate_offset.yaw;      // convention: right yaw = positive
+    // Because of how I mount my gyro
+
+    data.angle_rate.roll = -(double)gyroX/65.5 - angle_rate_offset.roll;             // convention: right roll = positive
+    data.angle_rate.pitch = (double)gyroY/65.5 - angle_rate_offset.pitch;         // convention: up pitch = positive
+    data.angle_rate.yaw = -(double)gyroZ/65.5 - angle_rate_offset.yaw;      // convention: right yaw = positive
 
     // put data to raw report
     
@@ -76,8 +77,8 @@ ImuData Imu::read(){
     raw_gyros.z = gyroZ;
 
     // Calculate accelerometer data
-    double AccX = ((double)accelY/8192.0) - 0.09;
-    double AccY = -((double)accelX/8192.0) + 0.13;
+    double AccX = (-(double)accelX/8192.0) - 0.09;
+    double AccY = ((double)accelY/8192.0) + 0.13;
     double AccZ = -(double)accelZ/8192.0 - 0.03;
 
     data.accel.x = AccX;
