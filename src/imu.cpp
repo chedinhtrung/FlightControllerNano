@@ -77,23 +77,15 @@ ImuData Imu::read(){
     raw_gyros.z = gyroZ;
 
     // Calculate accelerometer data
-    
-    double AccX = (-(double)accelX/8192.0) + 0.07;
-    double AccY = ((double)accelY/8192.0) - 0.02;
-    double AccZ = -(double)accelZ/8192.0 + 0.015;
+
+    double AccX = ((double)accelX/8192.0) - 0.07;
+    double AccY = (-(double)accelY/8192.0) + 0.02;
+    double AccZ = (double)accelZ/8192.0 - 0.02;
 
     data.accel.x = AccX;
     data.accel.y = AccY;
-    data.accel.z = AccZ;  
-
-    /*
-    Serial.print("x: ");
-    Serial.print(AccX);
-    Serial.print(" y: ");
-    Serial.print(AccY);
-    Serial.print(" z: ");
-    Serial.println(AccZ);
-    */
+    data.accel.z = AccZ;
+    
 
 
     // Convert to angles

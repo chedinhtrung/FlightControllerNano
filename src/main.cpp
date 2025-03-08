@@ -78,8 +78,8 @@ void clearI2C() {
 
 
 void setup() {
-  gimbal.attach(3);
-  gimbal.write(10);
+  //gimbal.attach(3);
+  //gimbal.write(10);
 
   delay(4000);
 
@@ -90,10 +90,10 @@ void setup() {
   imu.setup();
   delay(200);
 
-  analogWriteFrequency(2, 2000);
-  analogWriteFrequency(5, 2000);
-  analogWriteFrequency(A8, 2000);
-  analogWriteFrequency(11, 2000);
+  analogWriteFrequency(FR, 2000);
+  analogWriteFrequency(FL, 2000);
+  analogWriteFrequency(BR, 2000);
+  analogWriteFrequency(BL, 2000);
   analogWriteResolution(12);
 
   Serial.begin(115200);
@@ -200,7 +200,7 @@ void loop() {
 
   // Output to motor, lock until throttle is not 0
   // Danger: forgetting to convert rd.ThrottleIn to percentage will lead to flyaway
-
+  
   if (rd.ThrottleIn > 0.01 && rd.ThrottleIn <= 1.0){
     motor.set_motor(fl, fr, bl, br);
   } else {
@@ -211,42 +211,9 @@ void loop() {
     //alt.filter.reset();
   }
 
-  // Telemetries
-  // Height report
-  if (micros() - last_altupdate > 260*1e3){  //height read at 4Hz
 
-    //double h_barometer = alt.read();
-    //report.h = h_barometer;
-    /*
-    double vertical_accel = (-imudata.accelX * model.sin_pitch + imudata.accelY * model.sin_roll * model.cos_pitch + imudata.accelZ * model.cos_roll * model.cos_pitch - 1) * 100 * 9.81 + 30;
-    Serial.println(vertical_accel);
-    vert_speed += 0.04 * vertical_accel;
-    vert_speed = 0.998 * vert_speed + 0.002 * (h - h_barometer) / 0.04;
 
-    double h_predicted = h - vert_speed * 0.04 - vertical_accel * 0.04 * 0.04 / 2.0;
-
-    double past_h = h;
-
-    h = h_alpha * h_predicted + (1 - h_alpha) * h_barometer;
-    
-    vert_speed = vert_speed * 0.992 + 0.008 * (h - past_h)/0.04;
-    */
-    //h = alt.read();
-    last_altupdate = micros();
-  }
-
-  //GPS report
-  while (Serial4.available() > 0)
-  {
-    char gpsData = Serial4.read();
-
-    // Send the read byte of data to the encode() function
-    if (gps.encode(gpsData))
-    {
-        report.lat = gps.location.lat();
-        report.lon = gps.location.lng();
-    }
-  }
+  
 
     // actuate gimbal
   if (micros() - last_gimbal > 0.04*1e6){
@@ -264,58 +231,6 @@ void loop() {
     }
     gimbal.write(final_angle);
     last_gimbal = micros();
-  }
-
-  // data gathering
-  /*
-    2B * 4 motors     = 8B
-    2B * 3 gyro vals  = 6B
-    2B * 3 accel vals = 6B 
-    2B   alt          = 2B
-    --------------------------
-                        22B * 8/4ms << 115200 baud/s     
-  */
-  
-  /*
-  if (rd.AuxChannel5In > 1700) {
-    Serial2.write(STARTBYTE);
-    
-    Serial2.write((uint8_t*)&motor.motor_report, sizeof(RawMotor));
-    Serial2.write((uint8_t*)&imu.raw_gyros, sizeof(RawImuData));
-    Serial2.write((uint8_t*)&imu.raw_accels, sizeof(RawImuData));
-    Serial2.write((uint8_t*)&alt.raw_alt, sizeof(uint16_t));
-
-  }
-  */
-
-  //FLight display report
-
-  if (micros() - last_report > 80*1e3){     //write a report to the pi every 80ms = 12.5hz
-    report.roll = model.angle.roll;
-    report.pitch = model.angle.pitch;
-    report.yaw = model.angle.yaw;
-    report.bat = analogRead(A0)/1023.0*(50 + 4.7)/4.7;
-    last_report = micros();
-    report.h = h;
-    report.lon = 0.0;
-    report.lat = 0.0;
-
-    Serial2.write(STARTBYTE);
-    //float checksum = report.roll + report.pitch + report.yaw + report.h;
-    Serial2.write((uint8_t*)&report, sizeof(report)); 
-    //Serial2.write(checksum);  
-    
-    /*
-    Serial.print("r: ");
-    Serial.print(report.roll);
-    Serial.print("p: ");
-    Serial.print(report.pitch);
-    Serial.print("y: ");
-    Serial.println(report.yaw);
-    */
-    
-    
-    
   }
 
   while(micros() - last_active < DT*1000.0){}
