@@ -2,7 +2,6 @@
 #define IMU
 
 #include "config.h"
-#include "datastructures.h"
 #include <Arduino.h>
 
 #define IMUADDR 0x68 // MPU6050/9250 I2C address

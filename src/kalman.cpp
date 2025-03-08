@@ -1,27 +1,20 @@
 #include "kalman.h"
 #include "config.h"
+#include "debugger.h"
 
 /*
     Reference: Dan Simon Optimal State Estimations, p.409
 */
-
-float deg_to_rad(float deg){
-    return deg/180*M_PI;
-}
-
-float rad_to_deg(float rad){
-    return rad*180/M_PI;
-}
 
 AttitudeKalman::AttitudeKalman(){
 }
 
 
 void AttitudeKalman::predict(ConvertedImuData gyros){
-    float sin_phi = sinf(deg_to_rad(x(0,0)));
-    float cos_phi = cosf(deg_to_rad(x(0,0)));
-    float sin_theta = sinf(deg_to_rad(x(1,0)));
-    float cos_theta = cosf(deg_to_rad(x(1,0)));
+    float sin_phi = sinf(x(0,0));
+    float cos_phi = cosf(x(0,0));
+    float sin_theta = sinf(x(1,0));
+    float cos_theta = cosf(x(1,0));
     if (abs(cos_theta) < 0.01){ cos_theta = 0.01/cos_theta*abs(cos_theta);}    // Prevent singularity
     float tan_theta = sin_theta/cos_theta;
 
@@ -58,10 +51,12 @@ void AttitudeKalman::predict(ConvertedImuData gyros){
 }
 
 void AttitudeKalman::update(ConvertedImuData accels){
-    float norm = accels.x*accels.x + accels.y*accels.y + accels.z*accels.z;
-    if (abs(norm-1)>0.2){
-        return;
-    }
+    float a_norm = abs(accels.x*accels.x + accels.y*accels.y + accels.z*accels.z - 1.0);
+    float meas_covar = a_norm + 0.004;
+    R(0,0) = meas_covar;
+    R(1,1) = meas_covar;
+    R(2,2) = meas_covar;
+
     BLA::Matrix<3,1,float> y;
     y(0,0) = accels.x;
     y(1,0) = accels.y;

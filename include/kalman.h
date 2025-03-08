@@ -17,20 +17,20 @@ using namespace BLA;
 class AttitudeKalman {
     public:
         BLA::Matrix<3,1,float> x = {0.0, 0.0, 0.0};
-        BLA::Matrix<3,3,float> Q = {
-            0.2f, 0.0f, 0.0f,
-            0.0f, 0.2f, 0.0f,
-            0.0f, 0.0f, 0.2f
+        BLA::Matrix<3,3,float> Q = {     // rotation rate integration accurate to 0.5 degrees
+        4e-5, 0.0f, 0.0f,
+            0.0f, 4e-5, 0.0f,
+            0.0f, 0.0f, 4e-5
         }; 
-        BLA::Matrix<3,3,float> R = {
-            0.05f, 0.0f, 0.0f,
-            0.0f, 0.05f, 0.0f,
-            0.0f, 0.0f, 0.05f
+        BLA::Matrix<3,3,float> R = {     // Covariance of 0.1g 
+            0.01f, 0.0f, 0.0f,
+            0.0f, 0.01f, 0.0f,
+            0.0f, 0.0f, 0.01f
         };
-        BLA::Matrix<3,3,float> P = {
-            4.0f, 0.0f, 0.0f,
-            0.0f, 4.0f, 0.0f,
-            0.0f, 0.0f, 4.0f
+        BLA::Matrix<3,3,float> P = {    // Covariance of 2 degrees, to radian
+            1.22e-3, 0.0f, 0.0f,
+            0.0f, 1.22e-3, 0.0f,
+            0.0f, 0.0f, 1.22e-3
         };
         BLA::Matrix<3,3,float> K;
         //BLA::Matrix<3,3,float> F;  F is unnecessary, since F = Identity

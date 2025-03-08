@@ -2,6 +2,7 @@
 #include "Wire.h"
 #include <Arduino.h>
 #include "debugger.h"
+#include "utils.h"
 
 void Imu::setup(){
     // Manual accel ffset values
@@ -77,7 +78,9 @@ ImuData Imu::read(){
     // NOTE: has to remap to actual x y z of drone due to imu mounting position!
     data.gyro.x = -(float)gyroX/65.5 - offset.gyro.x;          
     data.gyro.y = (float)gyroY/65.5 - offset.gyro.y;             
-    data.gyro.z = -(float)gyroZ/65.5 - offset.gyro.z;      
+    data.gyro.z = -(float)gyroZ/65.5 - offset.gyro.z;     
+    
+    deg_to_rad(data.gyro);
 
     // Calculate accelerometer data
     float AccX = -(float)accelX/8192.0 - offset.accel.x;
@@ -96,7 +99,7 @@ void Imu::calibrate_gyro(){
     float y_rot_rate_offset = 0.0;
     float z_rot_rate_offset = 0.0;
 
-    for (int i=0; i<3000; i++){
+    for (int i=0; i<1000; i++){
         ImuData data = read();
         x_rot_rate_offset += data.gyro.x;
         y_rot_rate_offset += data.gyro.y;

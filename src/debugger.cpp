@@ -1,6 +1,8 @@
 #include "debugger.h"
+#include <cstdarg>
+#include <string>
 
-void debug(char* label, ConvertedImuData data){
+void debug(const char* label, ConvertedImuData data){
     Serial.print(label);
     Serial.print(" x: ");
     Serial.print(data.x, 3);
@@ -8,5 +10,4 @@ void debug(char* label, ConvertedImuData data){
     Serial.print(data.y, 3);
     Serial.print(" z: ");
     Serial.println(data.z, 3);
-
 }
