@@ -78,8 +78,8 @@ void clearI2C() {
 
 
 void setup() {
-  //gimbal.attach(3);
-  //gimbal.write(10);
+  gimbal.attach(8);
+  gimbal.write(0);
 
   delay(4000);
 
@@ -97,7 +97,6 @@ void setup() {
   analogWriteResolution(12);
 
   Serial.begin(115200);
-  Serial2.begin(115200);
   Serial4.begin(115200);
 
   //clearI2C();
@@ -211,11 +210,8 @@ void loop() {
     //alt.filter.reset();
   }
 
-
-
-  
-
     // actuate gimbal
+    
   if (micros() - last_gimbal > 0.04*1e6){
     int compens = (int) model.angle.pitch;
     int gimbal_angle = (int)((rd.AuxChannel6In-1000)/2000 * 360);
@@ -230,8 +226,9 @@ void loop() {
       final_angle = 10;
     }
     gimbal.write(final_angle);
-    last_gimbal = micros();
+    last_gimbal = micros(); 
   }
+    
 
   while(micros() - last_active < DT*1000.0){}
 

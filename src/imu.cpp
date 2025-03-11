@@ -90,8 +90,8 @@ ImuData Imu::read(){
 
     // Convert to angles
 
-    data.angle.roll = atan(AccY/AccZ)/PI*180 + 8.2;                                // Convention: right roll = positive
-    data.angle.pitch = atan(-AccX/(sqrt(AccY*AccY + AccZ*AccZ)))/PI*180 + 6;       // Convention:  down = positive (mpu says up is positive!)
+    data.angle.roll = atan(AccY/AccZ)/PI*180;                                // Convention: right roll = positive
+    data.angle.pitch = atan(-AccX/(sqrt(AccY*AccY + AccZ*AccZ)))/PI*180;       // Convention:  down = positive (mpu says up is positive!)
     
     
     return data;
