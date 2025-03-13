@@ -5,6 +5,8 @@
 #include "imu.h"
 using namespace BLA;
 
+#define GPS_UPDATE_RATE 10      // 10 Hz GPS loop
+
 /*
     Reference: Dan Simon Optimal State Estimations, p.409
 
@@ -44,8 +46,8 @@ class AttitudeKalman {
         BLA::Matrix<3,1,float> h = {0, 0, 0};
         AttitudeKalman();
         void predict(ConvertedImuData gyros);
-        void update(ConvertedImuData accels);
-        ConvertedImuData read();
+        void update_roll_pitch(ConvertedImuData accels);
+        ConvertedImuData read_euler();
 };
 
 class PositionKalman {

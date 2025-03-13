@@ -50,7 +50,7 @@ void AttitudeKalman::predict(ConvertedImuData gyros){
     h(2,0) = -cos_theta*cos_phi;
 }
 
-void AttitudeKalman::update(ConvertedImuData accels){
+void AttitudeKalman::update_roll_pitch(ConvertedImuData accels){
     float a_norm = abs(accels.x*accels.x + accels.y*accels.y + accels.z*accels.z - 1.0);
     float meas_covar = a_norm + 0.004;
     R(0,0) = meas_covar;
@@ -74,7 +74,7 @@ void AttitudeKalman::update(ConvertedImuData accels){
     P = I_KH*P*(~I_KH) + K*R*~K;        // Follows Eq. 5.19 p.129, remark: This form is more stable. Empirically confirmed to be more stable
 }
 
-ConvertedImuData AttitudeKalman::read(){
+ConvertedImuData AttitudeKalman::read_euler(){
     ConvertedImuData data;
     data.x = x(0,0);
     data.y = x(1,0);
