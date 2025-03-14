@@ -34,12 +34,12 @@ void Dps310Altimeter::setup(){
     Wire.write(0x07);
     Wire.endTransmission();
 
-    delay(300);
+    delay(100);
 
     get_calibrations();
-    delay(300);
+    delay(50);
     get_initial();
-    delay(100);
+    delay(50);
 }
 
 int32_t twosComplement(int32_t val, uint8_t bits) {
@@ -96,7 +96,7 @@ void Dps310Altimeter::get_initial(){
     initial = 0.0;
     for (int i = 0; i<20; i++){
         sum += read();
-        delay(250);
+        delay(100);
     }
     initial = sum/20.0;
 }

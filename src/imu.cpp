@@ -76,11 +76,15 @@ ImuData Imu::read(){
 
     // Calculate angular velocities  
     // NOTE: has to remap to actual x y z of drone due to imu mounting position!
-    data.gyro.x = -(float)gyroX/65.5 - offset.gyro.x;          
-    data.gyro.y = (float)gyroY/65.5 - offset.gyro.y;             
-    data.gyro.z = -(float)gyroZ/65.5 - offset.gyro.z;     
+    data.gyro.x = -(float)gyroX/65.5;          
+    data.gyro.y = (float)gyroY/65.5;             
+    data.gyro.z = -(float)gyroZ/65.5;     
     
     deg_to_rad(data.gyro);
+
+    data.gyro.x -= offset.gyro.x;
+    data.gyro.y -= offset.gyro.y;
+    data.gyro.z -= offset.gyro.z;
 
     // Calculate accelerometer data
     float AccX = -(float)accelX/8192.0 - offset.accel.x;
@@ -107,7 +111,7 @@ void Imu::calibrate_gyro(){
         delay(1);
     }
 
-    offset.gyro.x = x_rot_rate_offset/3000.0;       // convention: right roll = positive
-    offset.gyro.y = y_rot_rate_offset/3000.0;    // convention: up pitch = positive
-    offset.gyro.z = z_rot_rate_offset/3000.0;        // convention: right yaw = positive
+    offset.gyro.x = x_rot_rate_offset/1000.0;       // convention: right roll = positive
+    offset.gyro.y = y_rot_rate_offset/1000.0;    // convention: up pitch = positive
+    offset.gyro.z = z_rot_rate_offset/1000.0;        // convention: right yaw = positive
 }
