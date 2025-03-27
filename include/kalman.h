@@ -18,7 +18,7 @@ using namespace BLA;
 
 class AttitudeKalman {
     public:
-        BLA::Matrix<3,1,float> x = {0.0, 0.0, 0.0};
+        BLA::Matrix<3,1,float> x = {0.0, 0.0, 0.0}; // Yaw, Pitch, Roll in that order
         BLA::Matrix<3,3,float> Q = {     // rotation rate integration accurate to 0.005 degrees
             1e-8, 0.0f, 0.0f,
             0.0f, 1e-8, 0.0f,
@@ -52,7 +52,7 @@ class AttitudeKalman {
 
 class PositionKalman {
     public:
-        PositionKalman(BLA::Matrix<6,6> Q, BLA::Matrix<6,6> R);
+        PositionKalman();
 };
 
 #endif

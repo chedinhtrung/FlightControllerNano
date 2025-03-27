@@ -13,14 +13,18 @@ OpticalFlow of = OpticalFlow();
 Dps310Altimeter alt = Dps310Altimeter();
 
 void setup(){
-    Serial.begin(115200);
-    Wire.begin();
-    Wire.setClock(400000);
-    delay(3000);
 
+    // Start comm
+    Serial.begin(115200);   // Serial debug
+    Wire.begin();
+    Wire.setClock(400000);  // High speed i2c with imu, altimeter, magnetometer
+    delay(4000);
+
+    // Setup imu: Subtract gyro static bias
     imu.setup();
     delay(100);
 
+    // Setup altimeter: Get calibration terms, get start alt
     alt.setup();
 }
 
@@ -33,9 +37,6 @@ void loop(){
     attitude_kf.predict(data.gyro);
     attitude_kf.update_roll_pitch(data.accel);
     ConvertedImuData euler = attitude_kf.read_euler();
-    ConvertedImuData d;
-    d.x = atanf(data.accel.y/data.accel.z)*180/M_PI;
-    d.y = atanf(data.accel.x/sqrt(data.accel.y*data.accel.y + data.accel.z*data.accel.z))*180/M_PI;
     rad_to_deg(euler); 
     debug("euler:", euler);
 }
